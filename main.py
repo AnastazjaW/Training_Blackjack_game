@@ -86,12 +86,14 @@ class Player:
         self.one_card_value = 0
         self.player_points = 0
 
-    def add_cards(self, new_cards):
+    def add_cards_and_points(self, new_cards):
         self.players_cards.append(new_cards)
         list_of_points = []
         for i in range(len(self.players_cards)):
             list_of_points.append(self.players_cards[i].value)
         self.player_points = sum(list_of_points)
+        if new_cards.rank == 'Ace' and self.player_points > 21:
+                self.player_points -= 10
 
     def str_shows_one_card(self):
         self.one_card_value = self.players_cards[1].value
@@ -116,7 +118,7 @@ class Player:
 
 def start_game():
     while True:
-        ready_to_play = input('Are you ready to start game? ').lower()
+        ready_to_play = input('Are you ready to start game? ').lower().strip()
         if ready_to_play == 'no':
             game_on = False
             break
@@ -126,9 +128,10 @@ def start_game():
         else:
             print('Please, enter Yes or No!')
 
+
 print("Welcome to Blackjack game!")
 start_game()
-player_name = input('Please, enter your name ')
+player_name = input('Please, enter your name ').strip()
 player1 = Player(player_name)
 dealer = Player('Dealer')
 player_account = Account(player_name, 100)
@@ -141,10 +144,10 @@ while True:
     print(player_account)
     player_account.bet()
     new_deck.deal_one()
-    player1.add_cards(new_deck.take_one())
-    dealer.add_cards(new_deck.take_one())
-    player1.add_cards(new_deck.take_one())
-    dealer.add_cards(new_deck.take_one())
+    player1.add_cards_and_points(new_deck.take_one())
+    dealer.add_cards_and_points(new_deck.take_one())
+    player1.add_cards_and_points(new_deck.take_one())
+    dealer.add_cards_and_points(new_deck.take_one())
     print(player1)
     print(dealer.str_shows_one_card())
     # Player's turn
@@ -153,7 +156,7 @@ while True:
         while player1.player_points < 21:
             hint_or_stand = input('Do you want hint or stand?')
             if hint_or_stand == 'hint':
-                player1.add_cards(new_deck.take_one())
+                player1.add_cards_and_points(new_deck.take_one())
                 print(player1)
             elif hint_or_stand == 'stand':
                 break
@@ -171,7 +174,7 @@ while True:
 
         # Dealer's turn
         while dealer.player_points < 21:
-            dealer.add_cards(new_deck.take_one())
+            dealer.add_cards_and_points(new_deck.take_one())
             print(dealer)
             if dealer.player_points == 21:
                 print('Dealer win!')
