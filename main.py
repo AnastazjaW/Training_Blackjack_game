@@ -1,14 +1,4 @@
-#Blackjack
-
-# Classes:
-# 1. Account (for diler and player)
-# 2. Card
-# 3. Deck
-# 4. Player
-
-
 import random
-
 
 class Account:
 
@@ -16,8 +6,6 @@ class Account:
          self.owner = owner
          self.balance = balance
          self.bet_amount = 0
-
-
 
      def bet(self):
          while True:
@@ -36,7 +24,6 @@ class Account:
 
      def add_money(self):
          self.balance += self.bet_amount*2
-
 
      def __str__(self):
          return f'There is {self.balance} on your account.'
@@ -75,9 +62,6 @@ class Deck:
         self.all_cards.pop(0)
         return player_card
 
-
-
-
 class Player:
 
     def __init__(self, name):
@@ -85,6 +69,7 @@ class Player:
         self.players_cards = []
         self.one_card_value = 0
         self.player_points = 0
+        self.aces = 0
 
     def add_cards_and_points(self, new_cards):
         self.players_cards.append(new_cards)
@@ -92,51 +77,38 @@ class Player:
         for i in range(len(self.players_cards)):
             list_of_points.append(self.players_cards[i].value)
         self.player_points = sum(list_of_points)
-        if new_cards.rank == 'Ace' and self.player_points > 21:
-                self.player_points -= 10
+        if new_cards.rank == 'Ace':
+            self.aces += 1
+        while self.player_points > 21 and self.aces >= 1:
+            self.player_points -= 10
+            self.aces -= 1
 
     def str_shows_one_card(self):
         self.one_card_value = self.players_cards[1].value
-        return self.name + ' has ' + "".join(str(self.players_cards[1])) + f'. It is {self.one_card_value} points'
+        return self.name + ' has:\n' + "".join(str(self.players_cards[1])) + f'\n{self.one_card_value} points'
 
-
-    def check_if_win(self):
-        if self.player_points == 21:
-            print(self.name + ' win!')
-            return True
-        if self.player_points > 21:
-            print(self.name + ' lose!')
-            return True
-        if self.player_points < 21:
-            return False
 
     def __str__(self):
-        all_player_cards = ' and '.join(map(str, self.players_cards))
-        return self.name + ' has ' + all_player_cards + f'. It is {self.player_points} points'
+        all_player_cards = '\n'.join(map(str, self.players_cards))
+        return self.name + ' has:\n' + all_player_cards + f'\n{self.player_points} points'
 
-
-
-def start_game():
+def play_again():
     while True:
-        ready_to_play = input('Are you ready to start game? ').lower().strip()
+        ready_to_play = input('Do you want play again? Enter Yes or No').lower().strip()
         if ready_to_play == 'no':
-            game_on = False
-            break
+            return False
         elif ready_to_play == 'yes':
-            game_on = True
-            break
+            return  True
         else:
             print('Please, enter Yes or No!')
 
 
 print("Welcome to Blackjack game!")
-start_game()
 player_name = input('Please, enter your name ').strip()
 player1 = Player(player_name)
 dealer = Player('Dealer')
 player_account = Account(player_name, 100)
 dealer_account = Account('Dealer', 0)
-
 
 while True:
     new_deck = Deck()
@@ -154,12 +126,14 @@ while True:
     game_on = True
     while game_on:
         while player1.player_points < 21:
-            hint_or_stand = input('Do you want hint or stand?')
-            if hint_or_stand == 'hint':
+            hint_or_stand = input('Do you want hint or stand? Enter h if hint, s if stand').lower().strip()
+            if hint_or_stand == 'h':
                 player1.add_cards_and_points(new_deck.take_one())
                 print(player1)
-            elif hint_or_stand == 'stand':
+            elif hint_or_stand == 's':
                 break
+            else:
+                print('Enter h or s')
         if player1.player_points > 21:
             print(player_name + ' lose! Dealer win!')
             print(player_account)
@@ -173,7 +147,7 @@ while True:
             break
 
         # Dealer's turn
-        while dealer.player_points < 21:
+        while dealer.player_points < 17:
             dealer.add_cards_and_points(new_deck.take_one())
             print(dealer)
             if dealer.player_points == 21:
@@ -186,7 +160,7 @@ while True:
                 player_account.add_money()
                 game_on = False
                 break
-    if input('Do you want play again?') == 'no':
+    if not play_again():
         break
     else:
         player1.players_cards = []
